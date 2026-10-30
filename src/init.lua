@@ -335,14 +335,17 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
     return window
 end
 
-PryvexHub.CreateWindow = PryvexHub.CreateWindow
-PryvexHub.Version = "1.0.0"
+-- Keep both dot and colon calling styles working.
+local createWindow = PryvexHub.CreateWindow
+
+function PryvexHub.CreateWindow(selfOrOptions: any, maybeOptions: {[string]: any}?)
+    local options = if selfOrOptions == PryvexHub then maybeOptions else selfOrOptions
+    return createWindow(options)
+end
+
+PryvexHub.Version = "1.0.1"
 PryvexHub.Themes = {"Dark"}
 PryvexHub.Theme = "Dark"
 PryvexHub.Options = {}
-
-function PryvexHub:CreateWindow(options: {[string]: any}?)
-    return self.CreateWindow(options)
-end
 
 return PryvexHub
