@@ -2,6 +2,7 @@
 -- Pryvex Hub UI starter. Client-side UI only.
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local Theme = require(script.Parent.Theme)
 local UI = require(script.Parent.Components)
@@ -43,6 +44,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         Position = UDim2.fromScale(0.5, 0.5),
         Size = UDim2.fromOffset(windowSize.X, windowSize.Y),
         BackgroundColor3 = Theme.Colors.Background,
+        BackgroundTransparency = Theme.Transparency.Window,
         BorderSizePixel = 0,
         ClipsDescendants = true,
     }, screenGui)
@@ -53,6 +55,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         Name = "Sidebar",
         Size = UDim2.new(0, 190, 1, 0),
         BackgroundColor3 = Theme.Colors.Sidebar,
+        BackgroundTransparency = Theme.Transparency.Sidebar,
         BorderSizePixel = 0,
     }, main)
 
@@ -169,8 +172,8 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
             page.Visible = tabName == name
         end
         for tabName, button in pairs(tabButtons) do
-            button.BackgroundColor3 = if tabName == name then Theme.Colors.AccentDark else Theme.Colors.Sidebar
-            button.TextColor3 = if tabName == name then Theme.Colors.Text else Theme.Colors.Muted
+            local selected = tabName == name
+            TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = if selected then Theme.Colors.AccentDark else Theme.Colors.Sidebar, BackgroundTransparency = if selected then 0.12 else 1, TextColor3 = if selected then Theme.Colors.Text else Theme.Colors.Muted}):Play()
         end
         pageTitle.Text = name
     end
@@ -371,6 +374,9 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
     end
 
     -- Drag the window from its sidebar/header region.
+    local entranceScale = UI.Create("UIScale", {Scale = 0.94}, main)
+    TweenService:Create(entranceScale, TweenInfo.new(0.32, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Scale = 1}):Play()
+
     local dragging = false
     local dragStart: Vector2?
     local startPosition: UDim2?
