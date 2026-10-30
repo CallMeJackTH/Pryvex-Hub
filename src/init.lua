@@ -3,8 +3,8 @@
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
-local Theme = require(script.Theme)
-local UI = require(script.Components)
+local Theme = require(script.Parent.Theme)
+local UI = require(script.Parent.Components)
 
 local PryvexHub = {}
 
