@@ -1,45 +1,36 @@
 --!strict
 -- Pryvex Hub single-file distribution.
--- Generated from src/Theme.lua, src/Components.lua, and src/init.lua.
--- UI framework only. No game automation or exploit functionality.
+-- Built from src/Theme.lua, src/Components.lua, and src/init.lua.
+-- Custom translucent Pryvex visual style with smooth UI transitions.
 
 -- Theme
 --!strict
--- Shared visual tokens for Pryvex Hub.
-
+-- Pryvex Hub airy translucent theme.
 local Theme = {
     Colors = {
-        Background = Color3.fromRGB(9, 15, 27),
-        Sidebar = Color3.fromRGB(12, 21, 36),
-        Surface = Color3.fromRGB(17, 29, 47),
-        SurfaceHover = Color3.fromRGB(23, 40, 62),
-        Border = Color3.fromRGB(37, 57, 79),
-        Accent = Color3.fromRGB(85, 191, 255),
-        AccentDark = Color3.fromRGB(37, 135, 196),
-        Text = Color3.fromRGB(235, 244, 255),
-        Muted = Color3.fromRGB(141, 165, 193),
-        Success = Color3.fromRGB(94, 214, 158),
-        Danger = Color3.fromRGB(245, 105, 119),
+        Background = Color3.fromRGB(15, 22, 35),
+        Sidebar = Color3.fromRGB(20, 30, 46),
+        Surface = Color3.fromRGB(31, 46, 66),
+        SurfaceHover = Color3.fromRGB(43, 65, 90),
+        Border = Color3.fromRGB(111, 151, 190),
+        Accent = Color3.fromRGB(111, 199, 255),
+        AccentDark = Color3.fromRGB(49, 126, 177),
+        Text = Color3.fromRGB(240, 247, 255),
+        Muted = Color3.fromRGB(166, 187, 211),
+        Success = Color3.fromRGB(112, 225, 177),
+        Danger = Color3.fromRGB(255, 125, 142),
     },
-
-    Fonts = {
-        Heading = Enum.Font.GothamBold,
-        Body = Enum.Font.Gotham,
-        Medium = Enum.Font.GothamMedium,
-    },
-
-    Dimensions = {
-        Window = Vector2.new(680, 460),
-        MinimumWindow = Vector2.new(520, 360),
-        SidebarWidth = 158,
-        CornerRadius = UDim.new(0, 10),
-    },
+    Transparency = { Window = 0.10, Sidebar = 0.18, Surface = 0.24, SurfaceHover = 0.12, Button = 0.22, Stroke = 0.48 },
+    Animation = { Fast = 0.14, Normal = 0.22, Slow = 0.32 },
+    Fonts = { Heading = Enum.Font.GothamBold, Body = Enum.Font.Gotham, Medium = Enum.Font.GothamMedium },
+    Dimensions = { Window = Vector2.new(760, 500), MinimumWindow = Vector2.new(520, 360), SidebarWidth = 190, CornerRadius = UDim.new(0, 12) },
 }
-
+return Theme
 
 
 -- UI components
 --!strict
+local TweenService = game:GetService("TweenService")
 
 local Components = {}
 
@@ -65,7 +56,7 @@ end
 function Components.Stroke(parent: Instance, color: Color3?, transparency: number?)
     return Components.Create("UIStroke", {
         Color = color or Theme.Colors.Border,
-        Transparency = transparency or 0,
+        Transparency = transparency or Theme.Transparency.Stroke,
         Thickness = 1,
     }, parent)
 end
@@ -92,6 +83,7 @@ function Components.Button(parent: Instance, text: string, size: UDim2, callback
     local button = Components.Create("TextButton", {
         AutoButtonColor = false,
         BackgroundColor3 = Theme.Colors.Surface,
+        BackgroundTransparency = Theme.Transparency.Button,
         BorderSizePixel = 0,
         Size = size,
         Font = Theme.Fonts.Medium,
@@ -100,15 +92,17 @@ function Components.Button(parent: Instance, text: string, size: UDim2, callback
         TextSize = 13,
     }, parent)
 
-    Components.Round(button, 8)
-    Components.Stroke(button)
+    Components.Round(button, 9)
+    local stroke = Components.Stroke(button)
 
     button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Theme.Colors.SurfaceHover
+        TweenService:Create(button, TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Theme.Colors.SurfaceHover, BackgroundTransparency = Theme.Transparency.SurfaceHover}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.14), {Transparency = 0.18}):Play()
     end)
 
     button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = Theme.Colors.Surface
+        TweenService:Create(button, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Theme.Colors.Surface, BackgroundTransparency = Theme.Transparency.Button}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.22), {Transparency = Theme.Transparency.Stroke}):Play()
     end)
 
     if callback then
@@ -118,16 +112,16 @@ function Components.Button(parent: Instance, text: string, size: UDim2, callback
     return button
 end
 
+return Components
 
--- The source modules normally expose this table as `UI` in init.lua.
--- In the single-file bundle, Components is defined above, so alias it here.
-local UI = Components
 
 -- Main library
+local UI = Components
 --!strict
 -- Pryvex Hub UI starter. Client-side UI only.
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 
 local PryvexHub = {}
@@ -167,6 +161,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         Position = UDim2.fromScale(0.5, 0.5),
         Size = UDim2.fromOffset(windowSize.X, windowSize.Y),
         BackgroundColor3 = Theme.Colors.Background,
+        BackgroundTransparency = Theme.Transparency.Window,
         BorderSizePixel = 0,
         ClipsDescendants = true,
     }, screenGui)
@@ -177,6 +172,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         Name = "Sidebar",
         Size = UDim2.new(0, 190, 1, 0),
         BackgroundColor3 = Theme.Colors.Sidebar,
+        BackgroundTransparency = Theme.Transparency.Sidebar,
         BorderSizePixel = 0,
     }, main)
 
@@ -293,8 +289,8 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
             page.Visible = tabName == name
         end
         for tabName, button in pairs(tabButtons) do
-            button.BackgroundColor3 = if tabName == name then Theme.Colors.AccentDark else Theme.Colors.Sidebar
-            button.TextColor3 = if tabName == name then Theme.Colors.Text else Theme.Colors.Muted
+            local selected = tabName == name
+            TweenService:Create(button, TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = if selected then Theme.Colors.AccentDark else Theme.Colors.Sidebar, BackgroundTransparency = if selected then 0.12 else 1, TextColor3 = if selected then Theme.Colors.Text else Theme.Colors.Muted}):Play()
         end
         pageTitle.Text = name
     end
@@ -495,6 +491,9 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
     end
 
     -- Drag the window from its sidebar/header region.
+    local entranceScale = UI.Create("UIScale", {Scale = 0.94}, main)
+    TweenService:Create(entranceScale, TweenInfo.new(0.32, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Scale = 1}):Play()
+
     local dragging = false
     local dragStart: Vector2?
     local startPosition: UDim2?
