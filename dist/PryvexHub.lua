@@ -1,4 +1,10 @@
---!strict\n-- Pryvex Hub single-file distribution.\n-- Generated from src/Theme.lua, src/Components.lua, and src/init.lua.\n-- UI framework only. No game automation or exploit functionality.\n\n-- Theme module\n--!strict
+--!strict
+-- Pryvex Hub single-file distribution.
+-- Generated from src/Theme.lua, src/Components.lua, and src/init.lua.
+-- UI framework only. No game automation or exploit functionality.
+
+-- Theme
+--!strict
 -- Shared visual tokens for Pryvex Hub.
 
 local Theme = {
@@ -30,9 +36,10 @@ local Theme = {
     },
 }
 
-return Theme
-\n\n-- Components module\n--!strict
-local Theme = require(script.Parent.Theme)
+
+
+-- UI components
+--!strict
 
 local Components = {}
 
@@ -111,14 +118,14 @@ function Components.Button(parent: Instance, text: string, size: UDim2, callback
     return button
 end
 
-return Components
-\n\n-- Main library\n--!strict
+
+
+-- Main library
+--!strict
 -- Pryvex Hub UI starter. Client-side UI only.
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
-local Theme = require(script.Parent.Theme)
-local UI = require(script.Parent.Components)
 
 local PryvexHub = {}
 
