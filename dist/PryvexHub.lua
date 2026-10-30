@@ -119,6 +119,9 @@ function Components.Button(parent: Instance, text: string, size: UDim2, callback
 end
 
 
+-- The source modules normally expose this table as `UI` in init.lua.
+-- In the single-file bundle, Components is defined above, so alias it here.
+local UI = Components
 
 -- Main library
 --!strict
