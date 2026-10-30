@@ -68,7 +68,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?)
     label(status,"●  VERSION 1.0",UDim2.new(1,-12,1,0),UDim2.fromOffset(8,0),{Font=Enum.Font.GothamMedium,TextSize=8,Color=Color3.fromRGB(160,222,255)})
     UI.Create("Frame",{Position=UDim2.new(0,24,0,75),Size=UDim2.new(1,-48,0,1),BackgroundColor3=Color3.fromRGB(102,139,170),BackgroundTransparency=.72,BorderSizePixel=0},content)
 
-    local pages={}, buttons={}, activeTab=nil
+    local pages, buttons, activeTab = {}, {}, nil
     local function selectTab(name)
         for tabName,page in pairs(pages) do page.Visible=(tabName==name) end
         for tabName,button in pairs(buttons) do
