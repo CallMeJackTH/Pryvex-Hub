@@ -90,6 +90,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         Position = UDim2.new(0, 12, 1, -12),
         Size = UDim2.new(1, -24, 0, 42),
         BackgroundColor3 = Theme.Colors.Surface,
+                BackgroundTransparency = Theme.Transparency.Surface,
         BorderSizePixel = 0,
     }, sidebar)
     UI.Round(sidebarFooter, 9)
@@ -156,6 +157,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         Position = UDim2.new(1, -22, 0, 20),
         Size = UDim2.fromOffset(104, 26),
         BackgroundColor3 = Theme.Colors.Surface,
+                BackgroundTransparency = Theme.Transparency.Surface,
         BorderSizePixel = 0,
     }, topBar)
     UI.Round(versionPill, 13)
@@ -240,6 +242,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
             local holder = UI.Create("Frame", {
                 Size = UDim2.new(1, -4, 0, 38),
                 BackgroundColor3 = Theme.Colors.Surface,
+                BackgroundTransparency = Theme.Transparency.Surface,
                 BorderSizePixel = 0,
             }, page)
             UI.Round(holder, 8)
@@ -253,6 +256,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
             local holder = UI.Create("Frame", {
                 Size = UDim2.new(1, -4, 0, 76),
                 BackgroundColor3 = Theme.Colors.Surface,
+                BackgroundTransparency = Theme.Transparency.Surface,
                 BorderSizePixel = 0,
             }, page)
             UI.Round(holder, 8)
@@ -315,6 +319,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
             Position = UDim2.new(1, -18, 1, -18),
             Size = UDim2.fromOffset(270, 68),
             BackgroundColor3 = Theme.Colors.Surface,
+                BackgroundTransparency = Theme.Transparency.Surface,
             BorderSizePixel = 0,
             ZIndex = 5,
         }, screenGui)
@@ -346,6 +351,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
             Position = UDim2.fromScale(0.5, 0.5),
             Size = UDim2.fromOffset(320, 170),
             BackgroundColor3 = Theme.Colors.Surface,
+                BackgroundTransparency = Theme.Transparency.Surface,
             BorderSizePixel = 0,
             ZIndex = 21,
         }, overlay)
