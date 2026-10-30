@@ -23,7 +23,8 @@ This is a UI framework starter, not an executor or exploit. Use it in experience
 
 ```lua
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local PryvexHub = require(ReplicatedStorage.PryvexHub)
+local hubFolder = ReplicatedStorage:WaitForChild("PryvexHub")
+local PryvexHub = require(hubFolder:WaitForChild("init"))
 
 local window = PryvexHub.CreateWindow({
     Title = "Pryvex Hub",
