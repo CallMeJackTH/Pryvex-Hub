@@ -417,9 +417,9 @@ function Library.CreateWindow(options)
                 BackgroundTransparency = 1, Visible = false, ZIndex = 100,
             }, gui)
             UI.Round(circle, 999)
-            UI.Stroke(circle, 0.12)
+            UI.Stroke(circle, Theme.Colors.Accent, 0.12)
             local stroke = circle:FindFirstChildOfClass("UIStroke")
-            if stroke then stroke.Color = Theme.Colors.Accent; stroke.Thickness = 1.5 end
+            if stroke then stroke.Thickness = 1.5 end
 
             local function isPlayerCharacter(model)
                 for _, player in ipairs(Players:GetPlayers()) do
