@@ -1,4 +1,5 @@
 --!strict
+local TweenService = game:GetService("TweenService")
 local Theme = require(script.Parent.Theme)
 
 local Components = {}
@@ -25,7 +26,7 @@ end
 function Components.Stroke(parent: Instance, color: Color3?, transparency: number?)
     return Components.Create("UIStroke", {
         Color = color or Theme.Colors.Border,
-        Transparency = transparency or 0,
+        Transparency = transparency or Theme.Transparency.Stroke,
         Thickness = 1,
     }, parent)
 end
@@ -52,6 +53,7 @@ function Components.Button(parent: Instance, text: string, size: UDim2, callback
     local button = Components.Create("TextButton", {
         AutoButtonColor = false,
         BackgroundColor3 = Theme.Colors.Surface,
+        BackgroundTransparency = Theme.Transparency.Button,
         BorderSizePixel = 0,
         Size = size,
         Font = Theme.Fonts.Medium,
@@ -60,15 +62,17 @@ function Components.Button(parent: Instance, text: string, size: UDim2, callback
         TextSize = 13,
     }, parent)
 
-    Components.Round(button, 8)
-    Components.Stroke(button)
+    Components.Round(button, 9)
+    local stroke = Components.Stroke(button)
 
     button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Theme.Colors.SurfaceHover
+        TweenService:Create(button, TweenInfo.new(0.14, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Theme.Colors.SurfaceHover, BackgroundTransparency = Theme.Transparency.SurfaceHover}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.14), {Transparency = 0.18}):Play()
     end)
 
     button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = Theme.Colors.Surface
+        TweenService:Create(button, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Theme.Colors.Surface, BackgroundTransparency = Theme.Transparency.Button}):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.22), {Transparency = Theme.Transparency.Stroke}):Play()
     end)
 
     if callback then
