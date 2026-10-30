@@ -37,6 +37,16 @@ home:AddButton({ Title = "Show notification", Description = "Test the notificati
 end })
 ```
 
+## Single-file loader
+
+For environments that explicitly support `loadstring` and `game:HttpGet`, use this one-line loader:
+
+```lua
+local PryvexHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/CallMeJackTH/Pryvex-Hub/main/dist/PryvexHub.lua"))()
+```
+
+This bundled file includes Theme, Components, and the main library. Standard Roblox LocalScripts cannot use this executor-style loader; in Roblox Studio, use the ModuleScript setup above.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
