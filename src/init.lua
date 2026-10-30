@@ -35,7 +35,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
     }, playerGui)
 
-    local requestedSize = options.Size or UDim2.fromOffset(580, 460)
+    local requestedSize = options.Size or UDim2.fromOffset(760, 500)
     local windowSize = Vector2.new(requestedSize.X.Offset, requestedSize.Y.Offset)
     local main = UI.Create("Frame", {
         Name = "Main",
@@ -44,30 +44,67 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         Size = UDim2.fromOffset(windowSize.X, windowSize.Y),
         BackgroundColor3 = Theme.Colors.Background,
         BorderSizePixel = 0,
+        ClipsDescendants = true,
     }, screenGui)
-    UI.Round(main, 12)
+    UI.Round(main, 14)
     UI.Stroke(main, Theme.Colors.Border)
 
     local sidebar = UI.Create("Frame", {
         Name = "Sidebar",
-        Size = UDim2.new(0, Theme.Dimensions.SidebarWidth, 1, 0),
+        Size = UDim2.new(0, 190, 1, 0),
         BackgroundColor3 = Theme.Colors.Sidebar,
         BorderSizePixel = 0,
     }, main)
-    UI.Round(sidebar, 12)
+
+    UI.Create("ImageLabel", {
+        Name = "BrandIcon",
+        BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(16, 17),
+        Size = UDim2.fromOffset(38, 38),
+        Image = "rbxassetid://127972121421541",
+        ScaleType = Enum.ScaleType.Fit,
+    }, sidebar)
 
     UI.Label(sidebar, options.Title or "Pryvex Hub",
-        UDim2.new(1, -24, 0, 28), UDim2.fromOffset(14, 16),
-        {Font = Theme.Fonts.Heading, TextSize = 17, Color = Theme.Colors.Accent})
+        UDim2.new(1, -68, 0, 25), UDim2.fromOffset(62, 17),
+        {Font = Theme.Fonts.Heading, TextSize = 16, Color = Theme.Colors.Accent})
 
     UI.Label(sidebar, options.SubTitle or options.Subtitle or "CONTROL CENTER",
-        UDim2.new(1, -24, 0, 18), UDim2.fromOffset(14, 44),
+        UDim2.new(1, -68, 0, 17), UDim2.fromOffset(62, 42),
         {TextSize = 9, Color = Theme.Colors.Muted})
+
+    UI.Create("Frame", {
+        Name = "BrandDivider",
+        Position = UDim2.fromOffset(14, 68),
+        Size = UDim2.new(1, -28, 0, 1),
+        BackgroundColor3 = Theme.Colors.Border,
+        BorderSizePixel = 0,
+    }, sidebar)
+
+    local sidebarFooter = UI.Create("Frame", {
+        Name = "SidebarFooter",
+        AnchorPoint = Vector2.new(0, 1),
+        Position = UDim2.new(0, 12, 1, -12),
+        Size = UDim2.new(1, -24, 0, 42),
+        BackgroundColor3 = Theme.Colors.Surface,
+        BorderSizePixel = 0,
+    }, sidebar)
+    UI.Round(sidebarFooter, 9)
+    local onlineDot = UI.Create("Frame", {
+        Position = UDim2.fromOffset(11, 16),
+        Size = UDim2.fromOffset(8, 8),
+        BackgroundColor3 = Theme.Colors.Success,
+        BorderSizePixel = 0,
+    }, sidebarFooter)
+    UI.Round(onlineDot, 8)
+    UI.Label(sidebarFooter, "SYSTEM ONLINE",
+        UDim2.new(1, -34, 1, 0), UDim2.fromOffset(26, 0),
+        {Font = Theme.Fonts.Medium, TextSize = 9, Color = Theme.Colors.Muted})
 
     local tabList = UI.Create("ScrollingFrame", {
         Name = "TabList",
-        Position = UDim2.fromOffset(8, 78),
-        Size = UDim2.new(1, -16, 1, -88),
+        Position = UDim2.fromOffset(10, 86),
+        Size = UDim2.new(1, -20, 1, -148),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         ScrollBarThickness = 2,
@@ -83,14 +120,45 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
 
     local content = UI.Create("Frame", {
         Name = "Content",
-        Position = UDim2.new(0, Theme.Dimensions.SidebarWidth + 1, 0, 0),
-        Size = UDim2.new(1, -Theme.Dimensions.SidebarWidth - 1, 1, 0),
+        Position = UDim2.new(0, 190, 0, 0),
+        Size = UDim2.new(1, -190, 1, 0),
         BackgroundTransparency = 1,
     }, main)
 
-    local pageTitle = UI.Label(content, "Home",
-        UDim2.new(1, -40, 0, 34), UDim2.fromOffset(20, 16),
-        {Font = Theme.Fonts.Heading, TextSize = 20})
+    local topBar = UI.Create("Frame", {
+        Name = "TopBar",
+        Position = UDim2.fromOffset(0, 0),
+        Size = UDim2.new(1, 0, 0, 68),
+        BackgroundColor3 = Theme.Colors.Background,
+        BorderSizePixel = 0,
+    }, content)
+
+    local pageTitle = UI.Label(topBar, "Home",
+        UDim2.new(1, -190, 0, 27), UDim2.fromOffset(24, 12),
+        {Font = Theme.Fonts.Heading, TextSize = 19})
+
+    UI.Label(topBar, "Manage your experience",
+        UDim2.new(1, -190, 0, 18), UDim2.fromOffset(25, 38),
+        {TextSize = 10, Color = Theme.Colors.Muted})
+
+    UI.Create("Frame", {
+        Position = UDim2.new(0, 22, 1, -1),
+        Size = UDim2.new(1, -44, 0, 1),
+        BackgroundColor3 = Theme.Colors.Border,
+        BorderSizePixel = 0,
+    }, topBar)
+
+    local versionPill = UI.Create("Frame", {
+        AnchorPoint = Vector2.new(1, 0),
+        Position = UDim2.new(1, -22, 0, 20),
+        Size = UDim2.fromOffset(104, 26),
+        BackgroundColor3 = Theme.Colors.Surface,
+        BorderSizePixel = 0,
+    }, topBar)
+    UI.Round(versionPill, 13)
+    UI.Label(versionPill, "●  v1.0.1",
+        UDim2.new(1, -12, 1, 0), UDim2.fromOffset(8, 0),
+        {Font = Theme.Fonts.Medium, TextSize = 9, Color = Theme.Colors.Accent})
 
     local pages: {[string]: ScrollingFrame} = {}
     local tabButtons: {[string]: TextButton} = {}
@@ -116,12 +184,12 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
 
         local tabButton = UI.Create("TextButton", {
             Name = name .. "Tab",
-            Size = UDim2.new(1, 0, 0, 34),
+            Size = UDim2.new(1, 0, 0, 38),
             BackgroundColor3 = Theme.Colors.Sidebar,
             BorderSizePixel = 0,
             AutoButtonColor = false,
             Font = Theme.Fonts.Medium,
-            Text = "  " .. name,
+            Text = "    " .. name,
             TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
             TextColor3 = Theme.Colors.Muted,
@@ -131,8 +199,8 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
 
         local page = UI.Create("ScrollingFrame", {
             Name = name .. "Page",
-            Position = UDim2.fromOffset(20, 60),
-            Size = UDim2.new(1, -40, 1, -78),
+            Position = UDim2.fromOffset(24, 86),
+            Size = UDim2.new(1, -48, 1, -104),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
             ScrollBarThickness = 3,
@@ -180,15 +248,15 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         function tab:AddParagraph(options: any)
             options = options or {}
             local holder = UI.Create("Frame", {
-                Size = UDim2.new(1, -4, 0, 64),
+                Size = UDim2.new(1, -4, 0, 76),
                 BackgroundColor3 = Theme.Colors.Surface,
                 BorderSizePixel = 0,
             }, page)
             UI.Round(holder, 8)
-            UI.Label(holder, options.Title or "Paragraph", UDim2.new(1, -20, 0, 22),
-                UDim2.fromOffset(10, 5), {Font = Theme.Fonts.Heading, TextSize = 13})
-            UI.Label(holder, options.Content or "", UDim2.new(1, -20, 0, 30),
-                UDim2.fromOffset(10, 28), {TextSize = 11, Color = Theme.Colors.Muted, TextWrapped = true})
+            UI.Label(holder, options.Title or "Paragraph", UDim2.new(1, -24, 0, 24),
+                UDim2.fromOffset(14, 9), {Font = Theme.Fonts.Heading, TextSize = 13})
+            UI.Label(holder, options.Content or "", UDim2.new(1, -24, 0, 32),
+                UDim2.fromOffset(14, 36), {TextSize = 11, Color = Theme.Colors.Muted, TextWrapped = true})
             return holder
         end
 
