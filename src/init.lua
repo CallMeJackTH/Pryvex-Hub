@@ -35,7 +35,8 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
     }, playerGui)
 
-    local windowSize = options.Size or Theme.Dimensions.Window
+    local requestedSize = options.Size or UDim2.fromOffset(580, 460)
+    local windowSize = Vector2.new(requestedSize.X.Offset, requestedSize.Y.Offset)
     local main = UI.Create("Frame", {
         Name = "Main",
         AnchorPoint = Vector2.new(0.5, 0.5),
@@ -59,7 +60,7 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         UDim2.new(1, -24, 0, 28), UDim2.fromOffset(14, 16),
         {Font = Theme.Fonts.Heading, TextSize = 17, Color = Theme.Colors.Accent})
 
-    UI.Label(sidebar, options.Subtitle or "CONTROL CENTER",
+    UI.Label(sidebar, options.SubTitle or options.Subtitle or "CONTROL CENTER",
         UDim2.new(1, -24, 0, 18), UDim2.fromOffset(14, 44),
         {TextSize = 9, Color = Theme.Colors.Muted})
 
@@ -108,7 +109,8 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
 
     local window = {} :: any
 
-    function window:AddTab(name: string): TabApi
+    function window:AddTab(tabOptions: any): TabApi
+        local name = if typeof(tabOptions) == "table" then (tabOptions.Title or "Tab") else tostring(tabOptions)
         assert(not pages[name], "Tab already exists: " .. name)
         tabCount += 1
 
@@ -175,12 +177,39 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
             return holder :: any
         end
 
-        function tab:AddButton(text: string, callback: (() -> ())?): TextButton
-            local button = UI.Button(page, text, UDim2.new(1, -4, 0, 36), callback)
+        function tab:AddParagraph(options: any)
+            options = options or {}
+            local holder = UI.Create("Frame", {
+                Size = UDim2.new(1, -4, 0, 64),
+                BackgroundColor3 = Theme.Colors.Surface,
+                BorderSizePixel = 0,
+            }, page)
+            UI.Round(holder, 8)
+            UI.Label(holder, options.Title or "Paragraph", UDim2.new(1, -20, 0, 22),
+                UDim2.fromOffset(10, 5), {Font = Theme.Fonts.Heading, TextSize = 13})
+            UI.Label(holder, options.Content or "", UDim2.new(1, -20, 0, 30),
+                UDim2.fromOffset(10, 28), {TextSize = 11, Color = Theme.Colors.Muted, TextWrapped = true})
+            return holder
+        end
+
+        function tab:AddButton(buttonOptions: any, legacyCallback: (() -> ())?): TextButton
+            local text = if typeof(buttonOptions) == "table" then (buttonOptions.Title or "Button") else tostring(buttonOptions)
+            local callback = if typeof(buttonOptions) == "table" then buttonOptions.Callback else legacyCallback
+            local description = if typeof(buttonOptions) == "table" then buttonOptions.Description else nil
+            local height = if description then 52 else 36
+            local button = UI.Button(page, text, UDim2.new(1, -4, 0, height), callback)
+            if description then
+                button.Text = text .. "\\n" .. description
+                button.TextWrapped = true
+            end
             return button
         end
 
-        function tab:AddToggle(text: string, default: boolean, callback: ((boolean) -> ())?): TextButton
+        function tab:AddToggle(toggleName: string, toggleOptions: any, legacyCallback: ((boolean) -> ())?): TextButton
+            local config = if typeof(toggleOptions) == "table" then toggleOptions else {}
+            local text = config.Title or toggleName
+            local default = if typeof(toggleOptions) == "boolean" then toggleOptions else (config.Default or false)
+            local callback = config.Callback or legacyCallback
             local enabled = default
             local button = UI.Button(page, "", UDim2.new(1, -4, 0, 38), nil)
             local function refresh()
@@ -205,7 +234,10 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
         return tab
     end
 
-    function window:Notify(title: string, message: string)
+    function window:Notify(notification: any, legacyMessage: string?)
+        local title = if typeof(notification) == "table" then (notification.Title or "Pryvex Hub") else tostring(notification)
+        local message = if typeof(notification) == "table" then (notification.Content or "") else (legacyMessage or "")
+        local duration = if typeof(notification) == "table" then (notification.Duration or 3) else 3
         local toast = UI.Create("Frame", {
             Name = "Notification",
             AnchorPoint = Vector2.new(1, 1),
@@ -221,11 +253,45 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
             {Font = Theme.Fonts.Heading, TextSize = 13, Color = Theme.Colors.Accent})
         UI.Label(toast, message, UDim2.new(1, -20, 0, 25), UDim2.fromOffset(10, 31),
             {TextSize = 11, Color = Theme.Colors.Muted})
-        task.delay(3, function()
+        task.delay(duration, function()
             if toast.Parent then
                 toast:Destroy()
             end
         end)
+    end
+
+    function window:Dialog(dialogOptions: any)
+        dialogOptions = dialogOptions or {}
+        local buttons = dialogOptions.Buttons or {}
+        local overlay = UI.Create("Frame", {
+            Name = "DialogOverlay",
+            Size = UDim2.fromScale(1, 1),
+            BackgroundColor3 = Color3.new(0, 0, 0),
+            BackgroundTransparency = 0.35,
+            ZIndex = 20,
+        }, screenGui)
+        local card = UI.Create("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromOffset(320, 170),
+            BackgroundColor3 = Theme.Colors.Surface,
+            BorderSizePixel = 0,
+            ZIndex = 21,
+        }, overlay)
+        UI.Round(card, 10)
+        UI.Stroke(card, Theme.Colors.Border)
+        UI.Label(card, dialogOptions.Title or "Dialog", UDim2.new(1, -24, 0, 28), UDim2.fromOffset(12, 10),
+            {Font = Theme.Fonts.Heading, TextSize = 15})
+        UI.Label(card, dialogOptions.Content or "", UDim2.new(1, -24, 0, 75), UDim2.fromOffset(12, 42),
+            {TextSize = 12, Color = Theme.Colors.Muted, TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Top})
+        for index, item in ipairs(buttons) do
+            local button = UI.Button(card, item.Title or "OK", UDim2.fromOffset(130, 30), function()
+                overlay:Destroy()
+                if item.Callback then item.Callback() end
+            end)
+            button.Position = UDim2.new(1, -142 - ((index - 1) * 138), 1, -42)
+            button.ZIndex = 22
+        end
     end
 
     function window:SetVisible(visible: boolean)
@@ -267,6 +333,16 @@ function PryvexHub.CreateWindow(options: {[string]: any}?): WindowApi
     end)
 
     return window
+end
+
+PryvexHub.CreateWindow = PryvexHub.CreateWindow
+PryvexHub.Version = "1.0.0"
+PryvexHub.Themes = {"Dark"}
+PryvexHub.Theme = "Dark"
+PryvexHub.Options = {}
+
+function PryvexHub:CreateWindow(options: {[string]: any}?)
+    return self.CreateWindow(options)
 end
 
 return PryvexHub
