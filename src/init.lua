@@ -42,24 +42,30 @@ function Library.CreateWindow(options)
     local window = UI.Create("Frame", {
         Name = "Window", AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(width, height),
-        BackgroundColor3 = Color3.fromRGB(37, 38, 40), BackgroundTransparency = 0.13,
+        BackgroundColor3 = Color3.fromRGB(25, 29, 37), BackgroundTransparency = 0.10,
         BorderSizePixel = 0, ClipsDescendants = true,
     }, gui)
-    round(window, 9)
-    makeStroke(window, 0.62)
+    round(window, 11)
+    makeStroke(window, 0.48)
+    UI.Create("UIGradient", {Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(43, 51, 65)), ColorSequenceKeypoint.new(1, Color3.fromRGB(24, 27, 34))}), Rotation = 28}, window)
     local scale = UI.Create("UIScale", {Scale = 0.96}, window)
     tween(scale, 0.25, {Scale = 1})
 
     -- Title bar: narrow and understated, like the reference.
     local titlebar = UI.Create("Frame", {
         Name = "TitleBar", Size = UDim2.new(1, 0, 0, 43),
-        BackgroundColor3 = Color3.fromRGB(48, 49, 51), BackgroundTransparency = 0.1,
+        BackgroundColor3 = Color3.fromRGB(34, 41, 52), BackgroundTransparency = 0.04,
         BorderSizePixel = 0,
     }, window)
-    label(titlebar, options.Title or "Pryvex 1.0.0", UDim2.new(0, 170, 1, 0),
-        UDim2.fromOffset(16, 0), {TextSize = 13, Color = Color3.fromRGB(235, 235, 237)})
-    label(titlebar, "by Pryvex", UDim2.fromOffset(75, 43),
-        UDim2.fromOffset(112, 0), {TextSize = 12, Color = Color3.fromRGB(165, 165, 168)})
+    UI.Create("ImageLabel", {
+        Name = "PryvexLogo", BackgroundTransparency = 1,
+        Position = UDim2.fromOffset(13, 8), Size = UDim2.fromOffset(27, 27),
+        Image = "rbxassetid://127972121421541", ScaleType = Enum.ScaleType.Fit,
+    }, titlebar)
+    label(titlebar, options.Title or "PRYVEX HUB", UDim2.new(0, 150, 1, 0),
+        UDim2.fromOffset(48, 0), {TextSize = 13, Font = Enum.Font.GothamBold, Color = Color3.fromRGB(244, 247, 252)})
+    label(titlebar, "  /  PREMIUM INTERFACE", UDim2.fromOffset(160, 43),
+        UDim2.fromOffset(151, 0), {TextSize = 9, Font = Enum.Font.GothamMedium, Color = Color3.fromRGB(145, 163, 185)})
 
     local function titleControl(text, x, callback)
         local button = UI.Create("TextButton", {
@@ -81,9 +87,10 @@ function Library.CreateWindow(options)
     local sidebar = UI.Create("Frame", {
         Name = "Sidebar", Position = UDim2.fromOffset(0, 43),
         Size = UDim2.new(0, sidebarWidth, 1, -43),
-        BackgroundColor3 = Color3.fromRGB(39, 40, 42), BackgroundTransparency = 0.12,
+        BackgroundColor3 = Color3.fromRGB(27, 33, 43), BackgroundTransparency = 0.06,
         BorderSizePixel = 0,
     }, window)
+    UI.Create("Frame", {Name = "SidebarDivider", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 0), Size = UDim2.new(0, 1, 1, 0), BackgroundColor3 = Color3.fromRGB(115, 151, 190), BackgroundTransparency = 0.82, BorderSizePixel = 0}, sidebar)
     local nav = UI.Create("Frame", {
         Name = "Navigation", Position = UDim2.fromOffset(9, 12),
         Size = UDim2.new(1, -18, 1, -24), BackgroundTransparency = 1,
@@ -159,11 +166,11 @@ function Library.CreateWindow(options)
         local function card(height)
             local frame = UI.Create("Frame", {
                 Size = UDim2.new(1, -2, 0, height),
-                BackgroundColor3 = Color3.fromRGB(67, 68, 70),
-                BackgroundTransparency = 0.25, BorderSizePixel = 0,
+                BackgroundColor3 = Color3.fromRGB(55, 65, 80),
+                BackgroundTransparency = 0.24, BorderSizePixel = 0,
             }, page)
             round(frame, 5)
-            makeStroke(frame, 0.91)
+            makeStroke(frame, 0.86)
             return frame
         end
 
