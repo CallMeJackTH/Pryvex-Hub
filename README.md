@@ -12,10 +12,10 @@ A modular Roblox Luau interface starter with a dark navy and light-blue visual i
 
 ## Setup
 
-1. Copy the `src` folder into your Roblox experience.
-2. Keep the modules together in a Folder named `PryvexHub` in `ReplicatedStorage`.
+1. Create a ModuleScript named `PryvexHub` in `ReplicatedStorage` and paste the contents of `src/init.lua` into it.
+2. Put `Theme` and `Components` ModuleScripts beside `PryvexHub` in `ReplicatedStorage`, using `src/Theme.lua` and `src/Components.lua`.
 3. Add a LocalScript under `StarterPlayerScripts`.
-4. Use the example script as a starting point.
+4. Require it with `require(game:GetService("ReplicatedStorage"):WaitForChild("PryvexHub"))`.
 
 This is a UI framework starter, not an executor or exploit. Use it in experiences you own or are authorized to develop. Server-authoritative gameplay and permissions must be implemented on the server.
 
@@ -23,20 +23,18 @@ This is a UI framework starter, not an executor or exploit. Use it in experience
 
 ```lua
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local hubFolder = ReplicatedStorage:WaitForChild("PryvexHub")
-local PryvexHub = require(hubFolder:WaitForChild("init"))
+local PryvexHub = require(ReplicatedStorage:WaitForChild("PryvexHub"))
 
 local window = PryvexHub.CreateWindow({
     Title = "Pryvex Hub",
-    Subtitle = "Workspace",
+    SubTitle = "Workspace",
 })
 
-local home = window:AddTab("Home")
-home:AddSection("Welcome")
-home:AddLabel("Pryvex Hub is ready.")
-home:AddButton("Show notification", function()
-    window:Notify("Hello", "Your interface is working.")
-end)
+local home = window:AddTab({ Title = "Home", Icon = "home" })
+home:AddParagraph({ Title = "Welcome", Content = "Pryvex Hub is ready." })
+home:AddButton({ Title = "Show notification", Description = "Test the notification system", Callback = function()
+    window:Notify({ Title = "Hello", Content = "Your interface is working.", Duration = 5 })
+end })
 ```
 
 ## License
