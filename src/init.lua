@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local Theme = require(script.Parent.Theme)
 local UI = require(script.Parent.Components)
 local Library = {}
@@ -396,6 +397,160 @@ function Library.CreateWindow(options)
             return {GetValue=function() local result={}; for _,v in ipairs(items) do if selected[v] then table.insert(result,v) end end; return result end,Instance=holder}
         end
 
+
+        -- NPC-only aim trainer. It deliberately ignores every real player's character.
+        function tab:AddNPCAimbot(config)
+            config = config or {}
+            local camera = workspace.CurrentCamera
+            local enabled, showFov, visibleCheck = false, true, false
+            local smoothness = config.Smoothness or 8
+            local fovRadius = config.FOV or 120
+            local maxDistance = config.MaxDistance or 500
+            local aimPartName = "Head"
+            local target = nil
+            local candidates = {}
+            local scanClock = 0
+
+            local circle = UI.Create("Frame", {
+                Name = "NPC_Aim_FOV", AnchorPoint = Vector2.new(0.5, 0.5),
+                Size = UDim2.fromOffset(fovRadius * 2, fovRadius * 2),
+                BackgroundTransparency = 1, Visible = false, ZIndex = 100,
+            }, gui)
+            UI.Round(circle, 999)
+            UI.Stroke(circle, 0.12)
+            local stroke = circle:FindFirstChildOfClass("UIStroke")
+            if stroke then stroke.Color = Theme.Colors.Accent; stroke.Thickness = 1.5 end
+
+            local function isPlayerCharacter(model)
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player.Character == model then return true end
+                end
+                return false
+            end
+
+            local function refreshCandidates()
+                table.clear(candidates)
+                for _, object in ipairs(workspace:GetDescendants()) do
+                    if object:IsA("Model") and not isPlayerCharacter(object) then
+                        local humanoid = object:FindFirstChildOfClass("Humanoid")
+                        local root = object:FindFirstChild("HumanoidRootPart")
+                        if humanoid and humanoid.Health > 0 and root then
+                            table.insert(candidates, object)
+                        end
+                    end
+                end
+            end
+
+            local function getAimPart(model)
+                return model:FindFirstChild(aimPartName)
+                    or model:FindFirstChild("HumanoidRootPart")
+                    or model:FindFirstChild("Head")
+            end
+
+            local function findTarget()
+                camera = workspace.CurrentCamera
+                if not camera then return nil end
+                local mouse = UserInputService:GetMouseLocation()
+                local best, bestDistance = nil, fovRadius
+                for _, model in ipairs(candidates) do
+                    if model.Parent and not isPlayerCharacter(model) then
+                        local humanoid = model:FindFirstChildOfClass("Humanoid")
+                        local part = getAimPart(model)
+                        if humanoid and humanoid.Health > 0 and part then
+                            local worldDistance = (part.Position - camera.CFrame.Position).Magnitude
+                            local screenPoint, onScreen = camera:WorldToViewportPoint(part.Position)
+                            local screenDistance = (Vector2.new(screenPoint.X, screenPoint.Y) - mouse).Magnitude
+                            if onScreen and worldDistance <= maxDistance and screenDistance <= bestDistance then
+                                local clear = true
+                                if visibleCheck then
+                                    local params = RaycastParams.new()
+                                    params.FilterType = Enum.RaycastFilterType.Exclude
+                                    params.FilterDescendantsInstances = {Players.LocalPlayer.Character, camera}
+                                    local hit = workspace:Raycast(camera.CFrame.Position, part.Position - camera.CFrame.Position, params)
+                                    clear = not hit or hit.Instance:IsDescendantOf(model)
+                                end
+                                if clear then best, bestDistance = model, screenDistance end
+                            end
+                        end
+                    end
+                end
+                return best
+            end
+
+            local function setFov(value)
+                fovRadius = value
+                circle.Size = UDim2.fromOffset(value * 2, value * 2)
+            end
+
+            tab:AddSection("AIM ASSIST")
+            tab:AddToggle("Enable NPC Aim", {
+                Default = false,
+                Callback = function(value) enabled = value; if not value then target = nil end end,
+            })
+            tab:AddToggle("Show FOV Circle", {
+                Default = true,
+                Callback = function(value) showFov = value; circle.Visible = value end,
+            })
+            tab:AddToggle("Visible Check", {
+                Default = false,
+                Callback = function(value) visibleCheck = value end,
+            })
+            tab:AddSlider("FOV Radius", {
+                Min = 40, Max = 350, Default = fovRadius,
+                Callback = setFov,
+            })
+            tab:AddSlider("Smoothness", {
+                Min = 1, Max = 25, Default = smoothness,
+                Callback = function(value) smoothness = value end,
+            })
+            tab:AddSlider("Max Distance", {
+                Min = 50, Max = 1500, Default = maxDistance,
+                Callback = function(value) maxDistance = value end,
+            })
+            tab:AddDropdown("Aim Part", {
+                Values = {"Head", "UpperTorso", "Torso", "HumanoidRootPart"},
+                Default = "Head",
+                Callback = function(value) aimPartName = value end,
+            })
+            tab:AddButton({
+                Title = "Clear Current Target",
+                Description = "Release the current NPC target",
+                Callback = function() target = nil end,
+            })
+
+            circle.Visible = showFov
+            local connection
+            connection = RunService.RenderStepped:Connect(function(deltaTime)
+                if not circle.Parent then connection:Disconnect(); return end
+                local mouse = UserInputService:GetMouseLocation()
+                circle.Position = UDim2.fromOffset(mouse.X, mouse.Y)
+                circle.Visible = showFov
+                scanClock += deltaTime
+                if scanClock >= 0.35 then scanClock = 0; refreshCandidates() end
+                if not enabled then target = nil; return end
+                if not target or not target.Parent then target = findTarget() end
+                if target then
+                    local humanoid = target:FindFirstChildOfClass("Humanoid")
+                    local part = getAimPart(target)
+                    if not humanoid or humanoid.Health <= 0 or not part then
+                        target = nil
+                        return
+                    end
+                    camera = workspace.CurrentCamera
+                    if camera then
+                        local desired = CFrame.lookAt(camera.CFrame.Position, part.Position)
+                        local alpha = 1 - math.exp(-smoothness * deltaTime)
+                        camera.CFrame = camera.CFrame:Lerp(desired, alpha)
+                    end
+                end
+            end)
+            return {
+                GetTarget = function() return target end,
+                SetEnabled = function(_, value) enabled = not not value end,
+                Destroy = function() enabled = false; if connection then connection:Disconnect() end; if circle then circle:Destroy() end end,
+            }
+        end
+
         if next(pages) == nil then selectTab(name) end
         return tab
     end
@@ -461,7 +616,7 @@ local createWindow=Library.CreateWindow
 function Library.CreateWindow(selfOrOptions, maybeOptions)
     return createWindow(if selfOrOptions == Library then maybeOptions else selfOrOptions)
 end
-Library.Version="2.2.0"
+Library.Version="2.4.0"
 Library.Themes={"FluentGraphite"}
 Library.Theme="FluentGraphite"
 Library.Options={}
