@@ -5,7 +5,7 @@
     License: MIT (see LICENSE-FLUENT)
 
     Loads the official Fluent release and applies Pryvex branding,
-    a persistent mobile/desktop toggle button, and text-only tabs.
+    rounded menu icons, and a draggable floating open/close button.
 ]]
 
 local FLUENT_URL = "https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"
@@ -40,31 +40,26 @@ local function addPryvexToggle(window)
         existing:Destroy()
     end
 
-    -- This button stays visible while the Fluent window is minimized.
     local toggleButton = Instance.new("ImageButton")
     toggleButton.Name = "PryvexOpenClose"
-    toggleButton.Size = UDim2.fromOffset(52, 52)
+    toggleButton.Size = UDim2.fromOffset(54, 54)
     toggleButton.Position = UDim2.new(0, 18, 0.5, 0)
     toggleButton.AnchorPoint = Vector2.new(0, 0.5)
-    toggleButton.BackgroundColor3 = Color3.fromRGB(20, 23, 32)
-    toggleButton.BackgroundTransparency = 0.08
+    toggleButton.BackgroundColor3 = Color3.fromRGB(25, 28, 38)
+    toggleButton.BackgroundTransparency = 0.05
     toggleButton.BorderSizePixel = 0
     toggleButton.AutoButtonColor = true
     toggleButton.Image = PRYVEX_ICON
     toggleButton.ScaleType = Enum.ScaleType.Fit
     toggleButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
     toggleButton.ZIndex = 100
+    toggleButton.Active = true
     toggleButton.Parent = parent
 
+    -- Rounded-square shape; no outline/stroke.
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0)
+    corner.CornerRadius = UDim.new(0, 13)
     corner.Parent = toggleButton
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(105, 170, 255)
-    stroke.Thickness = 1.5
-    stroke.Transparency = 0.12
-    stroke.Parent = toggleButton
 
     local padding = Instance.new("UIPadding")
     padding.PaddingTop = UDim.new(0, 7)
@@ -75,10 +70,65 @@ local function addPryvexToggle(window)
 
     local sizeConstraint = Instance.new("UISizeConstraint")
     sizeConstraint.MinSize = Vector2.new(48, 48)
-    sizeConstraint.MaxSize = Vector2.new(56, 56)
+    sizeConstraint.MaxSize = Vector2.new(60, 60)
     sizeConstraint.Parent = toggleButton
 
+    -- Allow the floating button to be dragged freely with mouse or touch.
+    local UserInputService = game:GetService("UserInputService")
+    local dragging = false
+    local dragInput = nil
+    local dragStart = nil
+    local startPosition = nil
+    local wasDragged = false
+    local dragThreshold = 6
+
+    toggleButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            wasDragged = false
+            dragStart = input.Position
+            startPosition = toggleButton.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    toggleButton.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input == dragInput
+            or input.UserInputType == Enum.UserInputType.MouseMovement) then
+            local delta = input.Position - dragStart
+
+            if math.abs(delta.X) > dragThreshold or math.abs(delta.Y) > dragThreshold then
+                wasDragged = true
+            end
+
+            toggleButton.Position = UDim2.new(
+                startPosition.X.Scale,
+                startPosition.X.Offset + delta.X,
+                startPosition.Y.Scale,
+                startPosition.Y.Offset + delta.Y
+            )
+        end
+    end)
+
     toggleButton.Activated:Connect(function()
+        if wasDragged then
+            wasDragged = false
+            return
+        end
+
         if window.Root and window.Root.Parent then
             window:Minimize()
         else
@@ -125,33 +175,23 @@ Fluent.CreateWindow = function(self, config)
         end
     end
 
-    -- Use text-only tabs: suppress Fluent's tab icons entirely.
     if window then
+        -- Preserve Fluent's supplied menu icons and give image icons rounded corners.
         local originalAddTab = window.AddTab
 
         window.AddTab = function(tabSelf, tabConfig)
-            tabConfig = tabConfig or {}
-            local textOnlyConfig = {}
-            for key, value in pairs(tabConfig) do
-                textOnlyConfig[key] = value
-            end
-            textOnlyConfig.Icon = ""
-
-            local tab = originalAddTab(tabSelf, textOnlyConfig)
+            local tab = originalAddTab(tabSelf, tabConfig or {})
 
             if tab and tab.Frame then
                 local iconImage = tab.Frame:FindFirstChildWhichIsA("ImageLabel")
-                local titleLabel = tab.Frame:FindFirstChildWhichIsA("TextLabel")
 
                 if iconImage then
-                    iconImage.Visible = false
-                    iconImage.Image = ""
-                end
-
-                if titleLabel then
-                    titleLabel.AnchorPoint = Vector2.new(0, 0.5)
-                    titleLabel.Position = UDim2.new(0, 12, 0.5, 0)
-                    titleLabel.Size = UDim2.new(1, -24, 1, 0)
+                    local iconCorner = iconImage:FindFirstChildOfClass("UICorner")
+                    if not iconCorner then
+                        iconCorner = Instance.new("UICorner")
+                        iconCorner.CornerRadius = UDim.new(0, 5)
+                        iconCorner.Parent = iconImage
+                    end
                 end
             end
 
