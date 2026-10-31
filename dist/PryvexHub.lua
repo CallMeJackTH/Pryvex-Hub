@@ -124,13 +124,23 @@ local function addPryvexToggle(window)
     end)
 
     toggleButton.Activated:Connect(function()
+        -- Ignore the click generated at the end of a drag gesture.
         if wasDragged then
             wasDragged = false
             return
         end
 
+        if not toggleButton.Parent then
+            return
+        end
+
         if window.Root and window.Root.Parent then
-            window:Minimize()
+            -- Read the actual UI visibility instead of relying only on the
+            -- Minimized flag. This keeps the floating button synchronized
+            -- even if Fluent's keyboard shortcut changed the window state.
+            local shouldShowWindow = not window.Root.Visible
+            window.Root.Visible = shouldShowWindow
+            window.Minimized = not shouldShowWindow
         else
             toggleButton:Destroy()
         end
