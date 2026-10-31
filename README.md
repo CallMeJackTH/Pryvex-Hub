@@ -4,10 +4,10 @@ Pryvex Hub is a Roblox Luau interface library using the Fluent UI framework as i
 
 ## Executor loader
 
-For environments that explicitly support `loadstring` and `game:HttpGet`:
+For environments that explicitly support `loadstring` and `game:HttpGet` (using the separate Fluent build):
 
 ```lua
-local URL = "https://raw.githubusercontent.com/CallMeJackTH/Pryvex-Hub/fluent-clone-integration/dist/PryvexHub.lua"
+local URL = "https://raw.githubusercontent.com/CallMeJackTH/Pryvex-Hub/fluent-clone-integration/dist/PryvexFluent.lua"
 local Pryvex = loadstring(game:HttpGet(URL))()
 
 local Window = Pryvex.CreateWindow({
@@ -43,7 +43,7 @@ MainTab:AddButton({
 })
 ```
 
-The loader exposes the Fluent API with Pryvex branding and loads Fluent 1.1.0 from its official GitHub release at runtime. Internet access and executor support for `loadstring` are required. The Fluent source is not embedded in this loader, so it is not an offline or standalone build.
+The separate loader exposes the Fluent API with Pryvex branding and loads Fluent from its official GitHub release at runtime. Internet access and executor support for `loadstring` are required. The Fluent source is not embedded in this loader, so it is not an offline or standalone build. The original `dist/PryvexHub.lua` remains unchanged.
 
 ## Included UI API
 
