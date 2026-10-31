@@ -29,9 +29,7 @@ end
 
 local Fluent = loadFluent()
 
--- Fluent's title text is arranged by a horizontal UIListLayout.
--- Use a full-height wrapper so the logo is centered vertically by its
--- own ImageLabel, while the wrapper itself participates in the layout.
+-- Keep the Pryvex logo centered inside Fluent's title bar.
 local originalCreateWindow = Fluent.CreateWindow
 
 Fluent.CreateWindow = function(self, config)
@@ -60,6 +58,39 @@ Fluent.CreateWindow = function(self, config)
         end
     end
 
+    -- Fluent's default tab ImageLabel uses Stretch. Force Fit and align the
+    -- icon/text explicitly so icons keep their proportions across devices.
+    if window then
+        local originalAddTab = window.AddTab
+
+        window.AddTab = function(tabSelf, tabConfig)
+            local tab = originalAddTab(tabSelf, tabConfig)
+
+            if tab and tab.Frame then
+                local iconImage = tab.Frame:FindFirstChildWhichIsA("ImageLabel")
+                local titleLabel = tab.Frame:FindFirstChildWhichIsA("TextLabel")
+
+                if iconImage and iconImage.Image ~= "" then
+                    iconImage.AnchorPoint = Vector2.new(0, 0.5)
+                    iconImage.Position = UDim2.new(0, 8, 0.5, 0)
+                    iconImage.Size = UDim2.fromOffset(18, 18)
+                    iconImage.ScaleType = Enum.ScaleType.Fit
+                    iconImage.BackgroundTransparency = 1
+
+                    if titleLabel then
+                        titleLabel.Position = UDim2.new(0, 32, 0.5, 0)
+                        titleLabel.Size = UDim2.new(1, -38, 1, 0)
+                    end
+                elseif titleLabel then
+                    titleLabel.Position = UDim2.new(0, 12, 0.5, 0)
+                    titleLabel.Size = UDim2.new(1, -24, 1, 0)
+                end
+            end
+
+            return tab
+        end
+    end
+
     return window
 end
 
@@ -67,6 +98,7 @@ Fluent.Name = "Pryvex Hub"
 Fluent.Brand = "Pryvex"
 Fluent.Framework = "Fluent"
 Fluent.Icon = PRYVEX_ICON
+
 Fluent.CreatePryvexWindow = function(self, config)
     return self:CreateWindow(config)
 end
