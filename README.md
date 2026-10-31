@@ -1,52 +1,61 @@
 # Pryvex Hub
 
-A modular Roblox Luau interface starter with a dark navy and light-blue visual identity.
+Pryvex Hub is a Roblox Luau interface library using the Fluent UI framework as its UI core.
 
-## Project structure
+## Executor loader
 
-- `src/init.lua` — creates the window and public API
-- `src/Theme.lua` — shared colors and dimensions
-- `src/Components.lua` — reusable UI construction helpers
-- `src/Tabs/` — example tab content
-- `examples/ClientExample.client.lua` — example LocalScript usage
-
-## Setup
-
-1. Create a ModuleScript named `PryvexHub` in `ReplicatedStorage` and paste the contents of `src/init.lua` into it.
-2. Put `Theme` and `Components` ModuleScripts beside `PryvexHub` in `ReplicatedStorage`, using `src/Theme.lua` and `src/Components.lua`.
-3. Add a LocalScript under `StarterPlayerScripts`.
-4. Require it with `require(game:GetService("ReplicatedStorage"):WaitForChild("PryvexHub"))`.
-
-This is a UI framework starter, not an executor or exploit. Use it in experiences you own or are authorized to develop. Server-authoritative gameplay and permissions must be implemented on the server.
-
-## Example
+For environments that explicitly support `loadstring` and `game:HttpGet`:
 
 ```lua
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local PryvexHub = require(ReplicatedStorage:WaitForChild("PryvexHub"))
+local URL = "https://raw.githubusercontent.com/CallMeJackTH/Pryvex-Hub/fluent-clone-integration/dist/PryvexHub.lua"
+local Pryvex = loadstring(game:HttpGet(URL))()
 
-local window = PryvexHub.CreateWindow({
+local Window = Pryvex.CreateWindow({
     Title = "Pryvex Hub",
     SubTitle = "Workspace",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = false,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
 })
 
-local home = window:AddTab({ Title = "Home", Icon = "home" })
-home:AddParagraph({ Title = "Welcome", Content = "Pryvex Hub is ready." })
-home:AddButton({ Title = "Show notification", Description = "Test the notification system", Callback = function()
-    window:Notify({ Title = "Hello", Content = "Your interface is working.", Duration = 5 })
-end })
+local MainTab = Window:AddTab({
+    Title = "Main",
+    Icon = "home"
+})
+
+MainTab:AddParagraph({
+    Title = "Welcome",
+    Content = "Pryvex Hub is ready."
+})
+
+MainTab:AddButton({
+    Title = "Test notification",
+    Description = "Check that the UI is working",
+    Callback = function()
+        Pryvex:Notify({
+            Title = "Pryvex Hub",
+            Content = "Interface loaded successfully.",
+            Duration = 5
+        })
+    end
+})
 ```
 
-## Single-file loader
+The loader exposes the Fluent API with Pryvex branding and loads Fluent 1.1.0 from its official GitHub release at runtime. Internet access and executor support for `loadstring` are required. The Fluent source is not embedded in this loader, so it is not an offline or standalone build.
 
-For environments that explicitly support `loadstring` and `game:HttpGet`, use this one-line loader:
+## Included UI API
 
-```lua
-local PryvexHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/CallMeJackTH/Pryvex-Hub/main/dist/PryvexHub.lua"))()
-```
+The upstream Fluent framework provides windows, tabs, sections, buttons, toggles, sliders, dropdowns, color pickers, text inputs, keybinds, paragraphs, notifications, dialogs, themes, and interface/save manager addons.
 
-This bundled file includes Theme, Components, and the main library. Standard Roblox LocalScripts cannot use this executor-style loader; in Roblox Studio, use the ModuleScript setup above.
+See the [Fluent example](https://github.com/dawid-scripts/Fluent/blob/master/Example.lua) for the complete upstream API reference.
 
-## License
+## Credits and licenses
 
-MIT — see [LICENSE](LICENSE).
+- UI framework: [dawid-scripts/Fluent](https://github.com/dawid-scripts/Fluent), licensed under MIT. See [LICENSE-FLUENT](LICENSE-FLUENT).
+- Fluent also credits richie0866/remote-spy, violin-suzutsuki/LinoriaLib, 7kayoh/Acrylic, and Latte Softworks & Kotera in its upstream README.
+
+## Usage note
+
+Use UI scripts only in experiences you own or are authorized to test. This repository's UI layer does not provide gameplay exploits or player-targeting features.
