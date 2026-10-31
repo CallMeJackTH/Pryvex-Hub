@@ -29,7 +29,9 @@ end
 
 local Fluent = loadFluent()
 
--- Keep Fluent's original API and add the existing Pryvex logo to its title bar.
+-- Fluent's title text is arranged by a horizontal UIListLayout.
+-- Use a full-height wrapper so the logo is centered vertically by its
+-- own ImageLabel, while the wrapper itself participates in the layout.
 local originalCreateWindow = Fluent.CreateWindow
 
 Fluent.CreateWindow = function(self, config)
@@ -38,15 +40,23 @@ Fluent.CreateWindow = function(self, config)
     if window and window.TitleBar and window.TitleBar.Frame then
         local titleContent = window.TitleBar.Frame:FindFirstChildWhichIsA("Frame")
 
-        if titleContent and not titleContent:FindFirstChild("PryvexLogo") then
+        if titleContent and not titleContent:FindFirstChild("PryvexLogoContainer") then
+            local logoContainer = Instance.new("Frame")
+            logoContainer.Name = "PryvexLogoContainer"
+            logoContainer.BackgroundTransparency = 1
+            logoContainer.Size = UDim2.new(0, 24, 1, 0)
+            logoContainer.LayoutOrder = -1
+            logoContainer.Parent = titleContent
+
             local logo = Instance.new("ImageLabel")
             logo.Name = "PryvexLogo"
             logo.BackgroundTransparency = 1
-            logo.Size = UDim2.fromOffset(24, 24)
+            logo.Size = UDim2.fromOffset(22, 22)
+            logo.AnchorPoint = Vector2.new(0.5, 0.5)
+            logo.Position = UDim2.fromScale(0.5, 0.5)
             logo.Image = PRYVEX_ICON
             logo.ScaleType = Enum.ScaleType.Fit
-            logo.LayoutOrder = -1
-            logo.Parent = titleContent
+            logo.Parent = logoContainer
         end
     end
 
