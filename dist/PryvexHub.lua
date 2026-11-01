@@ -166,11 +166,33 @@ Fluent.CreateWindow = function(self, config)
         local titleContent = window.TitleBar.Frame:FindFirstChildWhichIsA("Frame")
 
         if titleContent and not titleContent:FindFirstChild("PryvexLogoContainer") then
+            -- Fluent uses a horizontal UIListLayout for title and subtitle.
+            -- Set explicit ordering and spacing so the logo shares the same
+            -- vertical centerline and does not overlap the title text.
+            local titleLayout = titleContent:FindFirstChildWhichIsA("UIListLayout")
+            if titleLayout then
+                titleLayout.FillDirection = Enum.FillDirection.Horizontal
+                titleLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+                titleLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                titleLayout.Padding = UDim.new(0, 7)
+            end
+
+            local titleLabels = {}
+            for _, child in ipairs(titleContent:GetChildren()) do
+                if child:IsA("TextLabel") then
+                    table.insert(titleLabels, child)
+                end
+            end
+            for index, label in ipairs(titleLabels) do
+                label.LayoutOrder = index
+                label.TextYAlignment = Enum.TextYAlignment.Center
+            end
+
             local logoContainer = Instance.new("Frame")
             logoContainer.Name = "PryvexLogoContainer"
             logoContainer.BackgroundTransparency = 1
-            logoContainer.Size = UDim2.new(0, 24, 1, 0)
-            logoContainer.LayoutOrder = -1
+            logoContainer.Size = UDim2.new(0, 26, 1, 0)
+            logoContainer.LayoutOrder = 0
             logoContainer.Parent = titleContent
 
             local logo = Instance.new("ImageLabel")
@@ -182,6 +204,10 @@ Fluent.CreateWindow = function(self, config)
             logo.Image = PRYVEX_ICON
             logo.ScaleType = Enum.ScaleType.Fit
             logo.Parent = logoContainer
+
+            for index, label in ipairs(titleLabels) do
+                label.LayoutOrder = index
+            end
         end
     end
 
