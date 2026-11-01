@@ -29,6 +29,35 @@ end
 
 local Fluent = loadFluent()
 
+-- Prefer the executor's hidden UI container when available.
+-- Fall back to Fluent's default CoreGui parent otherwise.
+local function attachGui()
+    local gui = Fluent.GUI
+    if not gui then
+        return false, "Fluent.GUI is missing"
+    end
+
+    local ok, hiddenGui = pcall(function()
+        if type(gethui) == "function" then
+            return gethui()
+        end
+        return nil
+    end)
+
+    if ok and hiddenGui then
+        gui.Parent = hiddenGui
+    end
+
+    gui.Enabled = true
+    gui.DisplayOrder = 999999
+    return gui.Parent ~= nil, gui.Parent and gui.Parent:GetFullName() or "GUI has no parent"
+end
+
+local guiAttached, guiStatus = attachGui()
+if not guiAttached then
+    warn("[Pryvex Hub] GUI attach warning: " .. tostring(guiStatus))
+end
+
 -- Keep Fluent's original API and add the existing Pryvex logo to its title bar.
 local originalCreateWindow = Fluent.CreateWindow
 
