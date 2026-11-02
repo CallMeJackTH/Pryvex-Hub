@@ -82,12 +82,6 @@ local function addFloatingToggle(window)
     corner.CornerRadius = UDim.new(0, 13)
     corner.Parent = button
 
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(75, 125, 145)
-    stroke.Transparency = 0.25
-    stroke.Thickness = 1
-    stroke.Parent = button
-
     local dragging = false
     local dragInput
     local dragStart
