@@ -3,7 +3,6 @@
     UI framework: Fluent by dawid-scripts
     Upstream: https://github.com/dawid-scripts/Fluent
     License: MIT (see LICENSE-FLUENT)
-
     Adds Pryvex branding, a correctly aligned title-bar logo, and a draggable
     floating show/hide control. Fluent's original API remains unchanged.
 ]]
@@ -71,7 +70,10 @@ local function addFloatingToggle(window)
     button.BorderSizePixel = 0
     button.AutoButtonColor = true
     button.Image = PRYVEX_ICON
+    button.ImageRectOffset = Vector2.new(0, 0)
+    button.ImageRectSize = Vector2.new(0, 0)
     button.ScaleType = Enum.ScaleType.Fit
+    button.ImageTransparency = 0
     button.ImageColor3 = Color3.fromRGB(255, 255, 255)
     button.Active = true
     button.Draggable = false
@@ -81,6 +83,14 @@ local function addFloatingToggle(window)
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 13)
     corner.Parent = button
+
+    -- กันไอคอนเบลอ / จัดกึ่งกลางในปุ่ม
+    local iconPad = Instance.new("UIPadding")
+    iconPad.PaddingTop = UDim.new(0, 8)
+    iconPad.PaddingBottom = UDim.new(0, 8)
+    iconPad.PaddingLeft = UDim.new(0, 8)
+    iconPad.PaddingRight = UDim.new(0, 8)
+    iconPad.Parent = button
 
     local dragging = false
     local dragInput
@@ -132,7 +142,6 @@ local function addFloatingToggle(window)
             moved = false
             return
         end
-
         if window.Root and window.Root.Parent then
             window.Minimized = window.Root.Visible
             window.Root.Visible = not window.Root.Visible
@@ -140,7 +149,7 @@ local function addFloatingToggle(window)
     end)
 end
 
--- Keep Fluent's API and place the Pryvex logo inside the title's horizontal layout.
+-- ใส่โลโก้ Pryvex ในแถบชื่อ จัด Layout ให้ถูกต้อง
 local originalCreateWindow = Fluent.CreateWindow
 
 Fluent.CreateWindow = function(self, config)
@@ -149,10 +158,18 @@ Fluent.CreateWindow = function(self, config)
     if window and window.TitleBar and window.TitleBar.Frame then
         local titleContent = window.TitleBar.Frame:FindFirstChildWhichIsA("Frame")
 
-        if titleContent and not titleContent:FindFirstChild("PryvexLogo") then
+        if titleContent then
+            -- ลบโลโก้เก่าถ้ามี (กันซ้ำตอนรันซ้อน)
+            local oldLogo = titleContent:FindFirstChild("PryvexLogo")
+            if oldLogo then
+                oldLogo:Destroy()
+            end
+
             local layout = titleContent:FindFirstChildWhichIsA("UIListLayout")
             if layout then
-                layout.Padding = UDim.new(0, 7)
+                layout.Padding = UDim.new(0, 8)
+                layout.VerticalAlignment = Enum.VerticalAlignment.Center
+                layout.SortOrder = Enum.SortOrder.LayoutOrder
             end
 
             local titleLabel
@@ -170,14 +187,21 @@ Fluent.CreateWindow = function(self, config)
             local logo = Instance.new("ImageLabel")
             logo.Name = "PryvexLogo"
             logo.BackgroundTransparency = 1
-            logo.Size = UDim2.fromOffset(22, 22)
+            logo.Size = UDim2.fromOffset(20, 20)
             logo.Image = PRYVEX_ICON
             logo.ScaleType = Enum.ScaleType.Fit
+            logo.ImageTransparency = 0
+            logo.ImageColor3 = Color3.fromRGB(255, 255, 255)
             logo.LayoutOrder = 0
+            logo.ZIndex = (titleLabel and titleLabel.ZIndex or 1)
             logo.Parent = titleContent
 
-            if titleLabel then titleLabel.LayoutOrder = 1 end
-            if subtitleLabel then subtitleLabel.LayoutOrder = 2 end
+            if titleLabel then
+                titleLabel.LayoutOrder = 1
+            end
+            if subtitleLabel then
+                subtitleLabel.LayoutOrder = 2
+            end
         end
     end
 
@@ -189,6 +213,7 @@ Fluent.Name = "Pryvex Hub"
 Fluent.Brand = "Pryvex"
 Fluent.Framework = "Fluent"
 Fluent.Icon = PRYVEX_ICON
+
 Fluent.CreatePryvexWindow = function(self, config)
     return self:CreateWindow(config)
 end
