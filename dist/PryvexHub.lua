@@ -35,20 +35,7 @@ local originalCreateWindow = Fluent.CreateWindow
 Fluent.CreateWindow = function(self, config)
     local window = originalCreateWindow(self, config)
 
-    if window and window.TitleBar and window.TitleBar.Frame then
-        local titleContent = window.TitleBar.Frame:FindFirstChildWhichIsA("Frame")
-
-        if titleContent and not titleContent:FindFirstChild("PryvexLogo") then
-            local logo = Instance.new("ImageLabel")
-            logo.Name = "PryvexLogo"
-            logo.BackgroundTransparency = 1
-            logo.Size = UDim2.fromOffset(24, 24)
-            logo.Image = PRYVEX_ICON
-            logo.ScaleType = Enum.ScaleType.Fit
-            logo.LayoutOrder = -1
-            logo.Parent = titleContent
-        end
-    end
+    -- Pryvex title-bar logo intentionally removed for a clean title bar.
 
     -- Create the floating Open/Close control in a separate ScreenGui.
     -- This keeps the icon visible while Fluent.GUI is hidden.
@@ -72,17 +59,19 @@ Fluent.CreateWindow = function(self, config)
     toggleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     toggleGui.Parent = toggleParent
 
-    local toggleButton = Instance.new("ImageButton")
+    local toggleButton = Instance.new("TextButton")
     toggleButton.Name = "PryvexIconButton"
     toggleButton.AnchorPoint = Vector2.new(1, 1)
     toggleButton.Position = UDim2.new(1, -28, 0.5, 0)
-    toggleButton.Size = UDim2.fromOffset(56, 56)
+    toggleButton.Size = UDim2.fromOffset(76, 42)
     toggleButton.BackgroundColor3 = Color3.fromRGB(25, 28, 38)
     toggleButton.BackgroundTransparency = 0.08
     toggleButton.BorderSizePixel = 0
     toggleButton.AutoButtonColor = false
-    toggleButton.Image = PRYVEX_ICON
-    toggleButton.ScaleType = Enum.ScaleType.Fit
+    toggleButton.Text = "CLOSE"
+    toggleButton.TextColor3 = Color3.fromRGB(245, 247, 255)
+    toggleButton.TextSize = 13
+    toggleButton.Font = Enum.Font.GothamBold
     toggleButton.ZIndex = 10
     toggleButton.Parent = toggleGui
 
@@ -139,6 +128,7 @@ Fluent.CreateWindow = function(self, config)
         -- can hide the whole library and desync its window state.
         if window and type(window.Minimize) == "function" then
             window:Minimize()
+            toggleButton.Text = window.Minimized and "OPEN" or "CLOSE"
         else
             warn("[Pryvex] Fluent window minimize method is unavailable.")
         end
@@ -150,7 +140,7 @@ end
 Fluent.Name = "Pryvex Hub"
 Fluent.Brand = "Pryvex"
 Fluent.Framework = "Fluent"
-Fluent.Icon = PRYVEX_ICON
+Fluent.Icon = nil
 Fluent.CreatePryvexWindow = function(self, config)
     return self:CreateWindow(config)
 end
