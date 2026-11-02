@@ -136,8 +136,13 @@ Fluent.CreateWindow = function(self, config)
             wasDragged = false
             return
         end
-        if Fluent.GUI then
-            Fluent.GUI.Enabled = not Fluent.GUI.Enabled
+        -- Use Fluent's own Window:Minimize() method.
+        -- Fluent toggles Window.Root.Visible internally; changing GUI.Enabled
+        -- can hide the whole library and desync its window state.
+        if window and type(window.Minimize) == "function" then
+            window:Minimize()
+        else
+            warn("[Pryvex] Fluent window minimize method is unavailable.")
         end
     end)
 
