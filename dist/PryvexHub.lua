@@ -211,6 +211,65 @@ Fluent.CreateWindow = function(self, config)
         end
     end
 
+    -- Add the Pryvex brand block at the top of the left navigation area.
+    -- Fluent reserves this 54px strip above TabFrame (which starts at Y=54).
+    if window and window.Root then
+        local existingBrand = window.Root:FindFirstChild("PryvexSidebarBrand")
+        if existingBrand then
+            existingBrand:Destroy()
+        end
+
+        local brand = Instance.new("Frame")
+        brand.Name = "PryvexSidebarBrand"
+        brand.BackgroundTransparency = 1
+        brand.BorderSizePixel = 0
+        brand.Position = UDim2.fromOffset(14, 7)
+        brand.Size = UDim2.new(0, window.TabWidth - 22, 0, 40)
+        brand.ZIndex = 5
+        brand.Parent = window.Root
+
+        local brandIcon = Instance.new("ImageLabel")
+        brandIcon.Name = "BrandIcon"
+        brandIcon.BackgroundTransparency = 1
+        brandIcon.BorderSizePixel = 0
+        brandIcon.Position = UDim2.fromOffset(0, 3)
+        brandIcon.Size = UDim2.fromOffset(32, 32)
+        brandIcon.Image = PRYVEX_ICON
+        brandIcon.ScaleType = Enum.ScaleType.Fit
+        brandIcon.ZIndex = 6
+        brandIcon.Parent = brand
+
+        local brandTitle = Instance.new("TextLabel")
+        brandTitle.Name = "BrandTitle"
+        brandTitle.BackgroundTransparency = 1
+        brandTitle.Position = UDim2.fromOffset(42, 1)
+        brandTitle.Size = UDim2.new(1, -44, 0, 21)
+        brandTitle.Font = Enum.Font.GothamBold
+        brandTitle.Text = "Pryvex Hub"
+        brandTitle.TextColor3 = Color3.fromRGB(245, 247, 255)
+        brandTitle.TextSize = 15
+        brandTitle.TextXAlignment = Enum.TextXAlignment.Left
+        brandTitle.TextYAlignment = Enum.TextYAlignment.Center
+        brandTitle.TextTruncate = Enum.TextTruncate.AtEnd
+        brandTitle.ZIndex = 6
+        brandTitle.Parent = brand
+
+        local brandSubtitle = Instance.new("TextLabel")
+        brandSubtitle.Name = "BrandSubtitle"
+        brandSubtitle.BackgroundTransparency = 1
+        brandSubtitle.Position = UDim2.fromOffset(42, 21)
+        brandSubtitle.Size = UDim2.new(1, -44, 0, 16)
+        brandSubtitle.Font = Enum.Font.Gotham
+        brandSubtitle.Text = "Premium Interface"
+        brandSubtitle.TextColor3 = Color3.fromRGB(155, 163, 183)
+        brandSubtitle.TextSize = 10
+        brandSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+        brandSubtitle.TextYAlignment = Enum.TextYAlignment.Center
+        brandSubtitle.TextTruncate = Enum.TextTruncate.AtEnd
+        brandSubtitle.ZIndex = 6
+        brandSubtitle.Parent = brand
+    end
+
     if window then
         -- Preserve Fluent's supplied menu icons and give image icons rounded corners.
         local originalAddTab = window.AddTab
