@@ -54,14 +54,12 @@ Fluent.CreateWindow = function(self, config)
     -- This keeps the icon visible while Fluent.GUI is hidden.
     local Players = game:GetService("Players")
     local UserInputService = game:GetService("UserInputService")
-    local CoreGui = game:GetService("CoreGui")
     local player = Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
 
-    local toggleParent = CoreGui
-    if type(gethui) == "function" then
-        local ok, hiddenGui = pcall(gethui)
-        if ok and hiddenGui then toggleParent = hiddenGui end
-    end
+    -- Parent the toggle to PlayerGui so it renders as a normal game ScreenGui.
+    -- It is separate from Fluent's window, so minimizing Fluent won't hide this button.
+    local toggleParent = playerGui
 
     local previousToggle = toggleParent:FindFirstChild("PryvexOpenClose")
     if previousToggle then previousToggle:Destroy() end
@@ -77,8 +75,8 @@ Fluent.CreateWindow = function(self, config)
     local toggleButton = Instance.new("ImageButton")
     toggleButton.Name = "PryvexIconButton"
     toggleButton.AnchorPoint = Vector2.new(1, 1)
-    toggleButton.Position = UDim2.new(1, -24, 1, -110)
-    toggleButton.Size = UDim2.fromOffset(54, 54)
+    toggleButton.Position = UDim2.new(1, -28, 0.5, 0)
+    toggleButton.Size = UDim2.fromOffset(56, 56)
     toggleButton.BackgroundColor3 = Color3.fromRGB(25, 28, 38)
     toggleButton.BackgroundTransparency = 0.08
     toggleButton.BorderSizePixel = 0
