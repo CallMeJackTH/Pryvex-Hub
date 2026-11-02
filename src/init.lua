@@ -609,15 +609,16 @@ function Library.CreateWindow(options)
     }, gui)
     round(floatingButton, 14)
 
-    local floatingDragging, floatingDragStart, floatingStartPosition = false, nil, nil
+    local floatingWasDragged, floatingDragStart, floatingStartPosition = false, nil, nil
     floatingButton.Activated:Connect(function()
-        if not floatingDragging then
+        if not floatingWasDragged then
             window.Visible = not window.Visible
         end
+        floatingWasDragged = false
     end)
     floatingButton.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            floatingDragging = false
+            floatingWasDragged = false
             floatingDragStart = input.Position
             floatingStartPosition = floatingButton.Position
         end
@@ -626,7 +627,7 @@ function Library.CreateWindow(options)
         if floatingDragStart and floatingStartPosition
             and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - floatingDragStart
-            if delta.Magnitude > 6 then floatingDragging = true end
+            if delta.Magnitude > 6 then floatingWasDragged = true end
             floatingButton.Position = UDim2.new(
                 floatingStartPosition.X.Scale, floatingStartPosition.X.Offset + delta.X,
                 floatingStartPosition.Y.Scale, floatingStartPosition.Y.Offset + delta.Y
@@ -637,7 +638,9 @@ function Library.CreateWindow(options)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             floatingDragStart = nil
             floatingStartPosition = nil
-            task.defer(function() floatingDragging = false end)
+            if floatingWasDragged then
+                task.delay(0.18, function() floatingWasDragged = false end)
+            end
         end
     end)
 
