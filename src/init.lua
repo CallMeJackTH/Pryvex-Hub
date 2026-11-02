@@ -586,10 +586,59 @@ function Library.CreateWindow(options)
         tween(box,0.18,{Position=UDim2.fromScale(.5,.5)})
     end
 
-    titleControl("×",0,function() gui:Destroy() end)
-    titleControl("—",-38,function() window.Visible=false end)
+    titleControl("×",0,function() api:Destroy() end)
+    titleControl("—",-38,function() api:SetVisible(false) end)
     titleControl("□",-76,function()
         window.Size = window.Size == UDim2.fromOffset(width,height) and UDim2.new(1,-40,1,-40) or UDim2.fromOffset(width,height)
+    end)
+
+    -- Floating Pryvex icon: stays visible while the main window is hidden.
+    -- It can be dragged with mouse or touch and toggles the window open/closed.
+    local floatingButton = UI.Create("ImageButton", {
+        Name = "PryvexOpenClose",
+        AnchorPoint = Vector2.new(1, 1),
+        Position = UDim2.new(1, -24, 1, -110),
+        Size = UDim2.fromOffset(54, 54),
+        BackgroundColor3 = Color3.fromRGB(29, 34, 43),
+        BackgroundTransparency = 0.08,
+        BorderSizePixel = 0,
+        AutoButtonColor = false,
+        Image = "rbxassetid://127972121421541",
+        ScaleType = Enum.ScaleType.Fit,
+        ZIndex = 50,
+    }, gui)
+    round(floatingButton, 14)
+
+    local floatingDragging, floatingDragStart, floatingStartPosition = false, nil, nil
+    floatingButton.Activated:Connect(function()
+        if not floatingDragging then
+            window.Visible = not window.Visible
+        end
+    end)
+    floatingButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            floatingDragging = false
+            floatingDragStart = input.Position
+            floatingStartPosition = floatingButton.Position
+        end
+    end)
+    local floatingMoveConnection = UserInputService.InputChanged:Connect(function(input)
+        if floatingDragStart and floatingStartPosition
+            and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - floatingDragStart
+            if delta.Magnitude > 6 then floatingDragging = true end
+            floatingButton.Position = UDim2.new(
+                floatingStartPosition.X.Scale, floatingStartPosition.X.Offset + delta.X,
+                floatingStartPosition.Y.Scale, floatingStartPosition.Y.Offset + delta.Y
+            )
+        end
+    end)
+    local floatingEndConnection = UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            floatingDragStart = nil
+            floatingStartPosition = nil
+            task.defer(function() floatingDragging = false end)
+        end
     end)
 
     local dragging, dragStart, startPosition = false, nil, nil
@@ -607,8 +656,15 @@ function Library.CreateWindow(options)
     local endConnection=UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging=false end
     end)
-    function api:SetVisible(value) window.Visible=value end
-    function api:Destroy() moveConnection:Disconnect(); endConnection:Disconnect(); gui:Destroy() end
+    function api:SetVisible(value) window.Visible = value == true end
+    function api:Toggle() window.Visible = not window.Visible end
+    function api:Destroy()
+        moveConnection:Disconnect()
+        endConnection:Disconnect()
+        floatingMoveConnection:Disconnect()
+        floatingEndConnection:Disconnect()
+        gui:Destroy()
+    end
     return api
 end
 
